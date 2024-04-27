@@ -1,15 +1,19 @@
 import express from "express";
 import dotenv from "dotenv";
 import contactRouter from "./src/routes/contact.route.js";
+import connectDB from "./src/db/index.js";
 
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use("/api/contacts", contactRouter)
+connectDB().then(
+  app.listen(PORT, () => {
+    console.log("server rnning on port ", PORT);
+  })
+);
 
-app.listen(PORT, () => {
-  console.log("server rnning on port ", PORT);
-});
+app.use(express.json());
+app.use("/api/contacts", contactRouter);
 
 export default app;
