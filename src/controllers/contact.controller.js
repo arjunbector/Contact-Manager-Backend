@@ -1,6 +1,6 @@
 // @desc Get all contacts
 // @route GET /api/contacts
-// @access Public
+// @access Private
 
 import mongoose from "mongoose";
 import { Contact } from "../models/contact.model.js";
@@ -8,14 +8,14 @@ import ApiResponse from "../utils/ApiResponse.js";
 import ApiError from "../utils/apiError.js";
 
 const getContacts = async (req, res) => {
-  const contacts = await Contact.find();
+  const contacts = await Contact.find({ userId: req.user._id });
   return res
     .status(200)
     .json(new ApiResponse(200, "Fetched all contacts successfully.", contacts));
 };
 // @desc Create a new contact
 // @route POST /api/contacts
-// @access Public
+// @access Private
 
 const createContact = async (req, res) => {
   try {
@@ -28,6 +28,7 @@ const createContact = async (req, res) => {
       throw new ApiError(400, "Contact already exists");
     }
     const contact = await Contact.create({
+      userId: req.user._id,
       name: name,
       email: email,
       phone: phone,
@@ -44,7 +45,7 @@ const createContact = async (req, res) => {
 
 // @desc Get a specific contact
 // @route GET /api/contacts/:id
-// @access Public
+// @access Private
 const getContact = async (req, res) => {
   try {
     const contactId = req.params.id;
@@ -54,6 +55,9 @@ const getContact = async (req, res) => {
     const contact = await Contact.findById(contactId);
     if (!contact) {
       throw new ApiError(404, "Contact not found");
+    }
+    if (contact.userId.toString() !== req.user._id) {
+      throw new ApiError(404, "No such contact found.");
     }
     return res
       .status(200)
@@ -68,7 +72,7 @@ const getContact = async (req, res) => {
 
 // @desc Update a specific contact
 // @route PUT /api/contacts/:id
-// @access Public
+// @access Private
 const updateContact = async (req, res) => {
   try {
     const contactId = req.params.id;
@@ -78,6 +82,9 @@ const updateContact = async (req, res) => {
     const contact = await Contact.findById(contactId);
     if (!contact) {
       throw new ApiError(404, "Contact not found");
+    }
+    if (contact.userId.toString() !== req.user._id) {
+      throw new ApiError(404, "No such contact found.");
     }
     const updatedContact = await Contact.findByIdAndUpdate(
       contactId,
@@ -102,7 +109,7 @@ const updateContact = async (req, res) => {
 
 // @desc Delete a specific contact
 // @route DELETE /api/contacts/:id
-// @access Public
+// @access Private
 const deleteContact = async (req, res) => {
   try {
     const contactId = req.params.id;
@@ -113,8 +120,13 @@ const deleteContact = async (req, res) => {
     if (!contact) {
       throw new ApiError(404, "Contact not found");
     }
+    if (contact.userId.toString() !== req.user._id) {
+      throw new ApiError(404, "No such contact found.");
+    }
     const deletedContact = await Contact.findByIdAndDelete(contactId);
-    return res.status(200).json(new ApiResponse(200, "Contact deleted", deletedContact));
+    return res
+      .status(200)
+      .json(new ApiResponse(200, "Contact deleted", deletedContact));
   } catch (err) {
     console.log(err);
     return res
