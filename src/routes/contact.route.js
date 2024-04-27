@@ -7,8 +7,6 @@ import {
   deleteContact,
 } from "../controllers/contact.controller.js";
 const router = Router();
-console.log("contact route");
-
 router.route("/").get(getContacts).post(createContact);
 // router.route("/").post(createContact);
 router.route("/:id").get(getContact).put(updateContact).delete(deleteContact);

@@ -12,9 +12,7 @@ async function generateAccessAndRefreshToken(userId) {
       throw new ApiError(404, "User not found");
     }
     const accessToken = await user.generateAccessToken();
-    console.log(accessToken);
     const refreshToken = await user.generateRefreshToken();
-    console.log(refreshToken);
     user.refreshToken = refreshToken;
     await user.save();
     return { accessToken, refreshToken };
@@ -63,6 +61,10 @@ const registerUser = async (req, res) => {
   }
 };
 
+// @desc login a user
+// @route POST api/user/login
+// @access Public
+
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -79,7 +81,6 @@ const loginUser = async (req, res) => {
     const { accessToken, refreshToken } = await generateAccessAndRefreshToken(
       user._id
     );
-    console.log(accessToken, refreshToken);
     const loggedInUser = await User.findById(user._id).select(
       "-password -refreshToken -accessToken"
     );
@@ -112,4 +113,29 @@ const loginUser = async (req, res) => {
   }
 };
 
-export { registerUser, loginUser };
+// @desc get current user details
+// @route GET api/user/current
+// @access Private
+
+const currentUser = async (req, res) => {
+  try {
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(200, "User details fetched successfully", req.user)
+      );
+  } catch (err) {
+    console.log(err);
+    return res
+      .status(err.statusCode || 500)
+      .json(
+        new ApiResponse(
+          err.statusCode || 500,
+          err.message || "Internal Server Error",
+          null
+        )
+      );
+  }
+};
+
+export { registerUser, loginUser, currentUser };
