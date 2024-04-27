@@ -138,4 +138,37 @@ const currentUser = async (req, res) => {
   }
 };
 
-export { registerUser, loginUser, currentUser };
+// @desc logout user
+// @route GET api/users/logout
+// @access Private
+const logoutUser = async (req, res) => {
+  try {
+    await User.findByIdAndUpdate(
+      req.user._id,
+      { refreshToken: undefined },
+      { new: true } // return updated document
+    );
+    const options = {
+      httpOnly: true,
+      secure: true,
+    };
+    return res
+      .status(200)
+      .clearCookie("accessToken", options)
+      .clearCookie("refreshToken", options)
+      .json(new ApiResponse(200, "Logout successful", null));
+  } catch (err) {
+    console.log(err);
+    return res
+      .status(err.statusCode || 500)
+      .json(
+        new ApiResponse(
+          err.statusCode || 500,
+          err.message || "Internal Server Error",
+          null
+        )
+      );
+  }
+};
+
+export { registerUser, loginUser, currentUser, logoutUser };
