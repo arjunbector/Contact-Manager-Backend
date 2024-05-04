@@ -49,7 +49,6 @@ REFRESH_TOKEN_EXPIRY=30d
 npm start
 ```
 
-
 The server will start running on the specified port.
 
 ## API Documentation
@@ -73,6 +72,13 @@ The server will start running on the specified port.
   - `email` (string): User's email address.
   - `password` (string): User's password.
 
+#### Update User
+
+- **URL** : `/api/users/update`
+- **Method**: `PUT`
+- **Headers:**
+  - `Authorization`: Bearer token obtained after logging in.
+  
 #### Log Out
 
 - **URL:** `/api/auth/logout`
