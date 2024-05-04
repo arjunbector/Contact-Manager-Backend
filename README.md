@@ -22,7 +22,7 @@ Welcome to the Contact Manager App Backend! This application provides a backend 
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/arjunbector/Contact-Manager_Backend.git
+git clone https://github.com/arjunbector/Contact-Manager-Backend.git
 ```
 
 2. Install dependencies:
