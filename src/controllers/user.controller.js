@@ -1,6 +1,7 @@
 import { User } from "../models/user.model.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import ApiError from "../utils/apiError.js";
+import uploadOnCloudinary from "../utils/cloudinary.js";
 // @desc Register a user
 // @route POST api/user/register
 // @access Public
@@ -171,4 +172,38 @@ const logoutUser = async (req, res) => {
   }
 };
 
-export { registerUser, loginUser, currentUser, logoutUser };
+const updateUser = async (req, res) => {
+  try {
+    const { username, email } = req.body;
+    console.log(req.files.avatar[0].path);
+    const cloud = await uploadOnCloudinary(req.files.avatar[0].path);
+    const avatar = cloud ? cloud.url : "";
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        username: username,
+        email: email,
+        avatar: avatar,
+      },
+      { new: true }
+    );
+    if (!updatedUser) {
+      throw new ApiError(404, "User not found.");
+    }
+    return res
+      .status(200)
+      .json(new ApiResponse(200, "User updated successfully", updatedUser));
+  } catch (err) {
+    return res
+      .status(err.statusCode || 500)
+      .json(
+        new ApiResponse(
+          err.statusCode || 500,
+          err.message || "Internal Server Error",
+          null
+        )
+      );
+  }
+};
+
+export { registerUser, loginUser, currentUser, logoutUser, updateUser };
